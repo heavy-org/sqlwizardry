@@ -1,0 +1,98 @@
+version: 2
+mergeable:
+  - when: pull_request.*
+    validate:
+      - do: title
+        must_exclude:
+          regex: ^\[WIP\]
+      - do: label
+        must_exclude:
+          regex: 'wip'
+  - when: pull_request.opened
+    name: "Greet a contributor"
+    validate: []
+    pass:
+      - do: comment
+        payload:
+          body: >
+            ## Hello there! :wave:
+
+            Thanks for opening a PR, your support is much appreciated. Please make sure you have provided enough context in your PR
+            description to help reviewers review this PR in a timely manner. They will be along shortly!
+  - when: pull_request.*
+    name: description filled.
+    validate:
+      - do: description
+        must_include:
+          regex: '\n\w+'
+          message: Description matter and should not be empty. Provide detail with **what** was changed, **why** it was changed, and **how** it was changed. Please the use the PULL_REQUEST_TEMPLATE.md.
+  - when: pull_request.*
+    name: 'Checklist completed.'
+    validate:
+      - do: description
+        must_exclude:
+          regex: '- [ ]'
+          message: Checklist not complete!
+  - when: issues.opened
+    validate:
+      - do: label
+        must_include:
+          regex: 'New Issue :new:'
+    pass:
+      - do: comment
+        payload:
+          body: >
+            ## This looks like a new issue :tada:
+
+            I have already assigned a reviewer for this issue to look into this problem for you.
+            They will likely comment on this issue to get a bit more context around the problem,
+            if you feel like you can provide more context before they get here that would be 
+            great :smiley:
+      - do: assign
+        assignees: ['Heavyhat']
+    fail:
+      - do: comment
+        payload:
+          body: >
+            ## This looks like a new issue :tada:
+
+            When creating a new issue please use the "New Issue" label, this helps makes sure that the maintianers properly 
+            plan addressing your issue and faciliates discussion around a fix and timeline. I have fixed the labels for you
+            and have already assigned a reviewer for this issue to look into this problem for you. They will likely comment 
+            on this issue to get a bit more context around the problem, if you feel like you can provide more context 
+            before they get here that would be great :smiley:.
+      - do: assign
+        assignees: ['Heavyhat']
+  - when: schedule.repository
+    validate:
+      - do: stale
+        days: 14
+        ignore_milestones: true
+        label: 
+          ignore: ["stale", "not-stale"]
+        type: pull_request
+    pass:
+      - do: label
+        labels: ["stale"]
+      - do: comment
+        payload:
+          body: >
+          ## This PR might be stale. :frowning:
+
+          I have labelled this PR as stale and it will be closed in 7 days. If this is in error you can remove the "stale"
+          label and instead label this PR as "not-stale". I will ignore this PR in future checks.
+  - when: schedule.repository
+    validate:
+      - do: stale
+        days: 21
+        ignore_milestones: true
+        label: 
+          match: ["stale"]
+          ignore: ["not-stale"]
+        type: pull_request
+    pass:
+      - do: comment
+        payload:
+          body: >
+          **Closing PR due to staleness.**
+      - do: close
