@@ -37,7 +37,7 @@ mergeable:
     validate:
       - do: label
         must_include:
-          regex: 'New Issue :new:'
+          regex: 'New Issue :new:|Bug :bug:'
     pass:
       - do: comment
         payload:
@@ -63,6 +63,9 @@ mergeable:
             before they get here that would be great :smiley:.
       - do: assign
         assignees: ['Heavyhat']
+      - do: labels
+        labels: ['New Issue :new:']
+        mode: 'replace'
   - when: schedule.repository
     validate:
       - do: stale
@@ -72,7 +75,7 @@ mergeable:
           ignore: ["stale", "not-stale"]
         type: pull_request
     pass:
-      - do: label
+      - do: labels
         labels: ["stale"]
       - do: comment
         payload:
