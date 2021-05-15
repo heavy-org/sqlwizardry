@@ -77,10 +77,10 @@ mergeable:
       - do: comment
         payload:
           body: >
-          ## This PR might be stale. :frowning:
+            ## This PR might be stale. :frowning:
 
-          I have labelled this PR as stale and it will be closed in 7 days. If this is in error you can remove the "stale"
-          label and instead label this PR as "not-stale". I will ignore this PR in future checks.
+            I have labelled this PR as stale and it will be closed in 7 days. If this is in error you can remove the "stale"
+            label and instead label this PR as "not-stale". I will ignore this PR in future checks.
   - when: schedule.repository
     validate:
       - do: stale
@@ -94,5 +94,5 @@ mergeable:
       - do: comment
         payload:
           body: >
-          **Closing PR due to staleness.**
+            **Closing PR due to staleness.**
       - do: close
