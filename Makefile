@@ -20,7 +20,6 @@ $(BUILD_DIR)/rules.ninja:
 	..
 
 init: $(BUILD_DIR)/rules.ninja
-	ln -sf $(BUILD_DIR)/compile_commands.json .
 
 clean:
 	@rm -Rf $(BUILD_DIR)
@@ -29,7 +28,7 @@ all: init
 	$(CMAKE) --build $(BUILD_DIR) --target all -- -j$(JOBS)
 
 build-test:
-	$(CMAKE) --build $(BUILD_DIR) --target tests.hh.tsk -- -j$(JOBS)
+	$(CMAKE) --build $(BUILD_DIR) --target tests.tsk -- -j$(JOBS)
 
 exec-test:
 	@cd $(BUILD_DIR) && \
@@ -37,10 +36,10 @@ exec-test:
 
 test: build-test exec-test
 
-$(BUILD_DIR)/test/benchmark/cruelbenchmark.tsk: init
-	$(CMAKE) --build $(BUILD_DIR) --target cruelbenchmark.tsk -- -j$(JOBS)
+$(BUILD_DIR)/test/benchmark/benchmark.tsk: init
+	$(CMAKE) --build $(BUILD_DIR) --target benchmark -- -j$(JOBS)
 
-build-benchmark: $(BUILD_DIR)/test/unit/tests.hh.tsk
+build-benchmark: $(BUILD_DIR)/test/unit/benchmark.tsk
 
 exec-benchmark: build-benchmark
 	$(CMAKE) --build $(BUILD_DIR) --target benchmark -- -j$(JOBS)
