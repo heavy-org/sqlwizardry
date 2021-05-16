@@ -1,0 +1,11 @@
+
+---
+BasedOnStyle: Google
+BreakBeforeBraces: Allman
+BreakStringLiterals: 'true'
+Cpp11BracedListStyle: 'true'
+SpaceAfterTemplateKeyword: 'true'
+Standard: Cpp11
+UseTab: Never
+ColumnLimit: 140
+...

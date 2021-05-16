@@ -1,0 +1,59 @@
+ame: Build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+  CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
+
+jobs:
+  build:
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Install Dependencies
+      run: sudo apt-get install libgtest-dev libboost-dev cmake clang-tidy clang-format doxygen ninja-build python3 python3-venv python3-pip libgmock-dev
+
+    - name: Initialisation
+      run: |
+        make docs-init
+        . venv/bin/activate
+        make init
+    - name: Build Tests
+      run: make build-test
+
+    - name: Execute Tests
+      run: make exec-test
+
+    - name: Collect Coverage Reports
+      run: |
+        . venv/bin/activate
+        gcovr --xml coverage.xml
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: XUnit
+        path: |
+          **/*.xunit.xml
+          coverage.xml
+    - name: Upload Coverage Reports
+      run: bash <(curl -s https://codecov.io/bash) -v || echo "Codecov did not collect coverage reports"
+
+    - name: Build Docs
+      run: |
+        . venv/bin/activate
+        make docs
+    - name: Publish
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./build/docs/build
