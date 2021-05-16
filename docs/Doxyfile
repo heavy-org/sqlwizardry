@@ -1,4 +1,3 @@
-
 # Configuration for Doxygen for use with CMake
 # Only options that deviate from the default are included
 # To create a new Doxyfile containing all available options, call `doxygen -g`
