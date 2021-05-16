@@ -1,0 +1,40 @@
+site_name: SQLWizardry
+theme:
+  name: material
+  features:
+  - navigation.instant
+  - navigation.tabs
+  - navigation.tabs.sticky
+  - navigation.sections
+  - navigation.expand
+  - navigation.top
+  - toc.integrate
+  - search.suggest
+  - search.highlight
+  logo: assets/logo.cvg
+  favicon: assets/favicon.png
+  language: en
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: orange
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: orange
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+  font:
+    text: Roboto
+    bode: Roboto Mono
+extra:
+  homepage: https://heavyhat.github.io/sqlwizardry
+markdown_extensions:
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+plugins:
+  - search

@@ -18,7 +18,7 @@ jobs:
     steps:
     - name: Checkout code. 
       uses: actions/checkout@v1
-  Initialise-Build:
+  Initialise:
     needs: Checkout
     runs-on: self-hosted
     steps:
@@ -27,12 +27,47 @@ jobs:
         make docs-init
         . venv/bin/activate
         make init
+  Build:
+    needs: Initialise
+    runs-on: self-hosted
+    steps:
     - name: Build sqlwizardry
       run: make build
+  Publish-Docs:
+    needs: Build
+    runs-on: self-hosted
+    steps:
+    - name: Publish
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./build/docs/build
   Execute-Tests:
-    needs: Initialise-Build
+    needs: Build
     runs-on: self-hosted
     steps:
     - name: Build tests
       run: |
-        make tests  
+        make test 
+  Coverage:
+    needs: Execute-Tests
+    runs-on: self-hosted
+    steps:
+    - name: Generate Coverage
+      run: |
+        . venv/bin/activate
+        gcovr --xml coverage.xml
+  Archive-Artifacts:
+    needs: Coverage
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: XUnit
+        path: |
+          **/*.xunit.xml
+          coverage.xml
+  Upload-Codecov:
+    needs: Archive-Artifacts
+    - name: Upload Coverage Reports
+      run: bash <(curl -s https://codecov.io/bash) -v || echo "Codecov did not collect coverage reports"
+  
