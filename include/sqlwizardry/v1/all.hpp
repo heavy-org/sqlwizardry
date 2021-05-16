@@ -5,7 +5,11 @@
 #include <sqlwizardry/v1/engine/debug.hpp>
 #include <sqlwizardry/v1/engine/mysql.hpp>
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 #include <sqlwizardry/v1/macro.hpp>
+=======
+#include <sqlwizardry/v1/macro.hpp>
+>>>>>>> Stashed changes
 =======
 #include <sqlwizardry/v1/macro.hpp>
 >>>>>>> Stashed changes
