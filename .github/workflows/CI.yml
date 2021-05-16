@@ -19,6 +19,7 @@ jobs:
     - name: Checkout code. 
       uses: actions/checkout@v1
   Initialise-Build:
+    needs: Checkout
     runs-on: self-hosted
     steps:
     - name: Initialise and build the project.
