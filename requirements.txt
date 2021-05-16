@@ -1,0 +1,8 @@
+sphinx
+sphinx-material
+sphinx-theme-material
+breathe
+exhale
+wheel
+conan
+gcovr
