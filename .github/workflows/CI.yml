@@ -59,6 +59,8 @@ jobs:
         gcovr --xml coverage.xml
   Archive-Artifacts:
     needs: Coverage
+    runs-on: self-hosted
+    steps:
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
       with:
@@ -68,6 +70,7 @@ jobs:
           coverage.xml
   Upload-Codecov:
     needs: Archive-Artifacts
+    runs-on: self-hosted
     - name: Upload Coverage Reports
       run: bash <(curl -s https://codecov.io/bash) -v || echo "Codecov did not collect coverage reports"
   
