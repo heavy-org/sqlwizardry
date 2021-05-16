@@ -19,7 +19,6 @@
 #include <boost/mpl/range_c.hpp>
 #include <boost/bind/bind.hpp>
 
-#include <https://raw.githubusercontent.com/TartanLlama/expected/master/include/tl/expected.hpp>
 
 namespace sqlwizardry {
 namespace detail {
@@ -292,13 +291,13 @@ constexpr static ColumnDefinition<_class_id,SQLWIZARDRY_COLUMN_TYPE(x)> SQLWIZAR
 #define SQLWIZARDRY_DECLARE_STATIC_COLUMNS(_class_id, ...) \
 BOOST_PP_SEQ_FOR_EACH_I(SQLWIZARDRY_DECLARE_STATIC_COLUMN, _class_id, BOOST_PP_VARIADIC_TO_SEQ(__VA_ARGS__))
 #define SQLWIZARDRY_TABLE(_class_id, _table_name, ...) \
-struct _class_id : model<_class_id> { \
+struct _class_id : sqlwizardry::model<_class_id> { \
     constexpr static std::string_view table_name = _table_name; \
     static constexpr std::size_t number_of_fields = BOOST_PP_VARIADIC_SIZE(__VA_ARGS__); \
     SQLWIZARDRY_DECLARE_STATIC_COLUMNS(_class_id,__VA_ARGS__) \
     struct __instance{\
         using column_definition = _class_id; \
-        friend struct reflector; \
+        friend struct sqlwizardry::reflector; \
         template<std::size_t N, class Self> \
         struct field_data {}; \
         SQLWIZARDRY_DECLARE_INSTANCE_COLUMNS(_class_id,__VA_ARGS__) \

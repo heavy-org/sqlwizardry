@@ -16,6 +16,7 @@ $(BUILD_DIR)/rules.ninja:
 	$(CMAKE) \
    	-DCMAKE_CXX_STANDARD=$(CXX_STANDARD) \
 	-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) \
+	-DSQLWIZARDRY_ENABLE_TEST_COVERAGE=ON \
     -G$(BUILD_TOOL) \
 	..
 
@@ -28,7 +29,7 @@ all: init
 	$(CMAKE) --build $(BUILD_DIR) --target all -- -j$(JOBS)
 
 build-test:
-	$(CMAKE) --build $(BUILD_DIR) --target tests.tsk -- -j$(JOBS)
+	$(CMAKE) --build $(BUILD_DIR) --target tests -- -j$(JOBS)
 
 exec-test:
 	@cd $(BUILD_DIR) && \

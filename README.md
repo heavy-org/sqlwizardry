@@ -1,6 +1,6 @@
 # SQLWizardry
 
-https://github.com/HeavyHat/sqlwizardry/workflows/Build/badge.svg
+[![Continuous Integration](https://github.com/HeavyHat/sqlwizardry/actions/workflows/build.yml/badge.svg)](https://github.com/HeavyHat/sqlwizardry/actions/workflows/build.yml)
 
 ## Introduction
 
