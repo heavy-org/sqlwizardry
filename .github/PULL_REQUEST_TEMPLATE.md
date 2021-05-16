@@ -2,7 +2,7 @@
 
 [Provide a high level overview of the feature implemented by your PR here. Try to keep this description to 3 sentences maximum.]
 
-**Fixes #<Issue number>**
+**Fixes/Linked to #<Issue number>**
 
 ## Rationale
 
@@ -12,4 +12,4 @@
 
 - [ ] **I have written unit tests.**
 - [ ] **I have checked previous issues for a discussions around my particular problem**
-- [ ] **I have run the test suite locally and confirmed that my change does not introduce any regressions**:wq
+- [ ] **I have run the test suite locally and confirmed that my change does not introduce any regressions**

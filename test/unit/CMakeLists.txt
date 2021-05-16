@@ -1,6 +1,7 @@
-file(GLOB tests_src *.cpp)
-add_executable(tests 
-    ${tests_src}
+file(GLOB test_srcs CONFIGURE_DEPENDS  *.cpp)
+
+add_executable(tests
+    ${test_srcs}
 )
 
 target_link_libraries(tests PUBLIC
@@ -10,7 +11,10 @@ target_link_libraries(tests PUBLIC
     pthread
 )
 
-set_target_properties(tests PROPERTIES SUFFIX ".tsk" CXX_STANDARD 17)
+set_target_properties(tests PROPERTIES
+    SUFFIX ".tsk"
+    CXX_STANDARD 11
+)
 
 add_test(NAME unit-tests
     COMMAND $<TARGET_FILE:tests>

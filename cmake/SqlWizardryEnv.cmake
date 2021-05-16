@@ -1,4 +1,9 @@
-#Boilerplate lifted from range-v3
+# Boilerplate lifted from range-v3
+# Copyright Gonzalo Brito Gadeschi 2015
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE.md or copy at http://boost.org/LICENSE_1_0.txt)
+#
+# Detects the C++ compiler, system, build-type, etc.
 
 include(CheckCXXCompilerFlag)
 
