@@ -71,6 +71,7 @@ jobs:
   Upload-Codecov:
     needs: Archive-Artifacts
     runs-on: self-hosted
+    steps:
     - name: Upload Coverage Reports
       run: bash <(curl -s https://codecov.io/bash) -v || echo "Codecov did not collect coverage reports"
   
