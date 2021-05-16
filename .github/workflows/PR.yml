@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+  CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
+
+jobs:
+  Checkout:
+    runs-on: self-hosted
+    steps:
+    - name: Checkout code. 
+      uses: actions/checkout@v1
+  Initialise:
+    needs: Checkout
+    runs-on: self-hosted
+    steps:
+    - name: Initialise and build the project.
+      run: |
+        make docs-init
+        . venv/bin/activate
+        make init
+  Build:
+    needs: Initialise
+    runs-on: self-hosted
+    steps:
+    - name: Build sqlwizardry
+      run: make build
+  Execute-Tests:
+    needs: Build
+    runs-on: self-hosted
+    steps:
+    - name: Build tests
+      run: |
+        make test 
+  Coverage:
+    needs: Execute-Tests
+    runs-on: self-hosted
+    steps:
+    - name: Generate Coverage
+      run: |
+        . venv/bin/activate
+        gcovr --xml coverage.xml
+  Archive-Artifacts:
+    needs: Coverage
+    runs-on: self-hosted
+    steps:
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: XUnit
+        path: |
+          **/*.xunit.xml
+          coverage.xml
+  Upload-Codecov:
+    needs: Archive-Artifacts
+    runs-on: self-hosted
+    steps:
+    - name: Upload Coverage Reports
+      run: bash <(curl -s https://codecov.io/bash) -v || echo "Codecov did not collect coverage reports"
+  
