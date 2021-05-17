@@ -51,7 +51,8 @@ template <typename T>\
 struct name {\
     const T& element;\
     constexpr name(const T& col) : element{col} {}\
-    void operator()(std::ostream& ss) {
+    template <typename STREAM_T> \
+    void operator()(STREAM_T& ss) {
 #define SQLWIZARDRY_DECLARE_END_ELEMENT_SERIALISER\
     }\
 };
@@ -65,7 +66,8 @@ template <BOOST_PP_TUPLE_REM()type_params>\
 struct name<BOOST_PP_TUPLE_REM()specialisation> {\
     const BOOST_PP_TUPLE_REM()element_type& element;\
     constexpr name(const BOOST_PP_TUPLE_REM()element_type& col) : element{col} {}\
-    void operator()(std::ostream& ss) {
+    template <typename STREAM_T> \
+    void operator()(STREAM_T& ss) {
 #define SQLWIZARDRY_END_TYPE_SPECIALISATION_ELEMENT_SERIALISER\
     }\
 };
@@ -75,7 +77,8 @@ template <typename MODEL, typename DB, typename... ELEMENTS>\
 struct name {\
     const Query<MODEL, DB, ELEMENTS...>& query;\
     constexpr name(const sqlwizardry::Query<MODEL, DB, ELEMENTS...>& q) : query{q} {}\
-    void operator()(std::ostream& ss) {
+    template <typename STREAM_T> \
+    void operator()(STREAM_T& ss) {
 #define SQLWIZARDRY_DECLARE_END_SERIALISER\
     }\
 };

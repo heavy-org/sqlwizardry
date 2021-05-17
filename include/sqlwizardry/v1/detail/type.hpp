@@ -10,6 +10,7 @@ struct select_tag {};
 struct where_tag {};
 struct order_tag {};
 struct limit_tag {};
+struct offset_tag {};
 
 template <typename K, typename V>
 struct KVType {

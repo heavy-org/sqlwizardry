@@ -58,6 +58,7 @@ class Query {
     type_of_t<where_tag,ELEMENTS...> _where;
     type_of_t<order_tag,ELEMENTS...> _order_by;
     type_of_t<limit_tag,ELEMENTS...> _limit;
+    type_of_t<offset_tag,ELEMENTS...> _offset;
 
     public:
 
@@ -66,7 +67,8 @@ class Query {
         _select{std::move(value_of<select_tag>(e...))}, 
         _where{std::move(value_of<where_tag>(e...))}, 
         _order_by{std::move(value_of<order_tag>(e...))}, 
-        _limit{std::move(value_of<limit_tag>(e...))} {
+        _limit{std::move(value_of<limit_tag>(e...))}, 
+        _offset{std::move(value_of<offset_tag>(e...))} {
 
     }
 
@@ -75,18 +77,18 @@ class Query {
         static_assert(is_empty_v<decltype(_select.value)>, "Selection already made in this query,");
         if constexpr(sizeof...(cols) == 0) {
             auto fields = get_columns<MODEL>();
-            return detail::make_query<MODEL>(db, kv<select_tag>(std::move(fields)), std::move(_where), std::move(_order_by), std::move(_limit));
+            return detail::make_query<MODEL>(db, kv<select_tag>(std::move(fields)), std::move(_where), std::move(_order_by), std::move(_limit),std::move(_offset));
         } else {
-            return detail::make_query<MODEL>(db, kv<select_tag>(std::make_tuple(cols...)), std::move(_where), std::move(_order_by), std::move(_limit));
+            return detail::make_query<MODEL>(db, kv<select_tag>(std::make_tuple(cols...)), std::move(_where), std::move(_order_by), std::move(_limit),std::move(_offset));
         }
     }
 
     template <typename PREDICATE>
     [[nodiscard]] constexpr auto where(PREDICATE&& pred) {
         if constexpr(is_empty_v<decltype(_where.value)>) {
-            return detail::make_query<MODEL>(db, std::move(_select), kv<where_tag>(std::forward<PREDICATE>(pred)), std::move(_order_by), std::move(_limit));
+            return detail::make_query<MODEL>(db, std::move(_select), kv<where_tag>(std::forward<PREDICATE>(pred)), std::move(_order_by), std::move(_limit),std::move(_offset));
         } else {
-            return detail::make_query<MODEL>(db, std::move(_select), kv<where_tag>(_where.value && std::forward<PREDICATE>(pred)), std::move(_order_by), std::move(_limit));
+            return detail::make_query<MODEL>(db, std::move(_select), kv<where_tag>(_where.value && std::forward<PREDICATE>(pred)), std::move(_order_by), std::move(_limit),std::move(_offset));
         }
     }
 
@@ -94,7 +96,26 @@ class Query {
     [[nodiscard]] constexpr auto order_by(ORDERING&& ...order){
         static_assert(is_empty_v<decltype(_order_by.value)>, "This query already has an ordering specified");
         auto ordering = get_ordering_tuple(std::forward<ORDERING>(order)...);
-        return detail::make_query<MODEL>(db, std::move(_select), std::move(_where), kv<order_tag>(std::move(ordering)), std::move(_limit));
+        return detail::make_query<MODEL>(db, std::move(_select), std::move(_where), kv<order_tag>(std::move(ordering)), std::move(_limit),std::move(_offset));
+    }
+
+    [[nodiscard]] constexpr auto limit(std::size_t l){
+        return detail::make_query<MODEL>(db, std::move(_select), std::move(_where), std::move(_order_by), kv<limit_tag>(l),std::move(_offset));
+    }
+
+    template <std::size_t L>
+    [[nodiscard]] constexpr auto limit(){
+        static_assert(L > 0, "Limit must be greater than 0");
+        return detail::make_query<MODEL>(db, std::move(_select), std::move(_where), std::move(_order_by), kv<limit_tag>(L),std::move(_offset));
+    }
+
+    [[nodiscard]] constexpr auto offset(std::size_t l){
+        return detail::make_query<MODEL>(db, std::move(_select), std::move(_where), std::move(_order_by), std::move(_limit), kv<offset_tag>(l));
+    }
+
+    template <std::size_t L>
+    [[nodiscard]] constexpr auto offset(){
+        return detail::make_query<MODEL>(db, std::move(_select), std::move(_where), std::move(_order_by), std::move(_limit),kv<offset_tag>(L));
     }
 
     [[nodiscard]] constexpr const auto& get_select() const {
@@ -111,6 +132,10 @@ class Query {
 
     [[nodiscard]] constexpr const auto& get_limit() const {
         return _limit.value;
+    }
+
+    [[nodiscard]] constexpr const auto& get_offset() const {
+        return _offset.value;
     }
 
     [[nodiscard]] constexpr auto& get_db() {

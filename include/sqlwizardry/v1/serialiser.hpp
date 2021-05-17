@@ -34,7 +34,7 @@ namespace sqlwizardry {
     SQLWIZARDRY_DECLARE_END_ELEMENT_SERIALISER
 
     SQLWIZARDRY_DECLARE_BEGIN_SERIALISER(from)
-    ss << "FROM ";
+    ss << " FROM ";
     from_element{std::get<0>(query.get_select())}(ss);
     SQLWIZARDRY_DECLARE_END_SERIALISER
 
@@ -51,7 +51,7 @@ namespace sqlwizardry {
     (typename T1, typename T2), 
     (Or<T1, T2>), 
     (Or<T1, T2>, std::void_t<>))
-        ss << "(";
+        ss << " (";
         where_element{element.condition_a}(ss);
         ss << " OR ";
         where_element{element.condition_b}(ss);
@@ -62,7 +62,7 @@ namespace sqlwizardry {
     (typename T1, typename T2), 
     (And<T1, T2>), 
     (And<T1, T2>, std::void_t<>))
-        ss << "(";
+        ss << " (";
         where_element<std::decay_t<T1>>{element.condition_a}(ss);
         ss << " AND ";
         where_element<std::decay_t<T2>>{element.condition_b}(ss);
@@ -73,7 +73,7 @@ namespace sqlwizardry {
     (typename T), 
     (Not<T>), 
     (Not<T>, std::void_t<>))
-        ss << "NOT (";
+        ss << " NOT (";
         where_element<std::decay_t<T>>{element.condition}(ss);
         ss << ")";
     SQLWIZARDRY_END_TYPE_SPECIALISATION_ELEMENT_SERIALISER
@@ -144,7 +144,7 @@ namespace sqlwizardry {
     SQLWIZARDRY_DECLARE_BEGIN_SERIALISER(where)
     using where_t = typename type_of_t<where_tag, ELEMENTS...>::value_type;
     if constexpr(!is_empty_v<where_t>) {
-        ss << "WHERE ";
+        ss << " WHERE ";
         where_element<std::decay_t<where_t>>{query.get_where()}(ss);
     }
     SQLWIZARDRY_DECLARE_END_SERIALISER
@@ -166,15 +166,29 @@ namespace sqlwizardry {
     SQLWIZARDRY_END_TYPE_SPECIALISATION_ELEMENT_SERIALISER
 
     SQLWIZARDRY_DECLARE_BEGIN_SERIALISER(order)
-    using order_t = type_of_t<order_tag, ELEMENTS...>;
+    using order_t = typename type_of_t<order_tag, ELEMENTS...>::value_type;
     if constexpr(!is_empty_v<order_t>) {
-        ss << "ORDER BY ";
+        ss << " ORDER BY ";
         std::apply([&ss](const auto& ...order) {
             int column = 0;
             int dummy[] = {
                 ((order_element<std::decay_t<decltype(order)>>{order}(ss), !column++ ? ss : ss << ", "),0)...
             };
         },query.get_order());
+    }
+    SQLWIZARDRY_DECLARE_END_SERIALISER
+
+    SQLWIZARDRY_DECLARE_BEGIN_SERIALISER(limit)
+    using limit_t = typename type_of_t<limit_tag, ELEMENTS...>::value_type;
+    if constexpr(!is_empty_v<limit_t>) {
+        ss << " LIMIT " << query.get_limit();
+    }
+    SQLWIZARDRY_DECLARE_END_SERIALISER
+
+    SQLWIZARDRY_DECLARE_BEGIN_SERIALISER(offset)
+    using offset_t = typename type_of_t<offset_tag, ELEMENTS...>::value_type;
+    if constexpr(!is_empty_v<offset_t>) {
+        ss << " OFFSET " << query.get_offset();
     }
     SQLWIZARDRY_DECLARE_END_SERIALISER
 
@@ -185,12 +199,11 @@ struct query_serialiser {
 
     auto operator()(std::ostream& ss) {
         select{query}(ss);
-        ss << " ";
         from{query}(ss);
-        ss << " ";
         where{query}(ss);
-        ss << " ";
         order{query}(ss);
+        limit{query}(ss);
+        offset{query}(ss);
     }
 
 };
