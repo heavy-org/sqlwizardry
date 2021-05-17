@@ -30,10 +30,8 @@ all: init
 	$(CMAKE) --build $(BUILD_DIR) --target all -- -j$(JOBS)
 
 
-$(BUILD_DIR)/test/unit/tests.tsk:
-	$(CMAKE) --build $(BUILD_DIR) --target tests -- -j$(JOBS)
-
 build-test: init $(BUILD_DIR)/test/unit/tests.tsk
+	$(CMAKE) --build $(BUILD_DIR) --target tests -- -j$(JOBS)
 
 exec-test:
 	@cd $(BUILD_DIR) && \

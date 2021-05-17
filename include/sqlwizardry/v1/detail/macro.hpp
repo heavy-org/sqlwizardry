@@ -71,9 +71,10 @@ struct name<BOOST_PP_TUPLE_REM()specialisation> {\
 };
 
 #define SQLWIZARDRY_DECLARE_BEGIN_SERIALISER(name)\
+template <typename MODEL, typename DB, typename... ELEMENTS>\
 struct name {\
-    const Query<MODEL, DB, SELECT, WHERE, ORDER_BY, LIMIT>& query;\
-    constexpr name(const sqlwizardry::Query<MODEL, DB, SELECT, WHERE, ORDER_BY, LIMIT>& q) : query{q} {}\
+    const Query<MODEL, DB, ELEMENTS...>& query;\
+    constexpr name(const sqlwizardry::Query<MODEL, DB, ELEMENTS...>& q) : query{q} {}\
     void operator()(std::ostream& ss) {
 #define SQLWIZARDRY_DECLARE_END_SERIALISER\
     }\

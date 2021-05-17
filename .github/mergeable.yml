@@ -37,7 +37,7 @@ mergeable:
     validate:
       - do: label
         must_include:
-          regex: 'New Issue :new:|Bug :bug:'
+          regex: 'New Issue|Bug'
     pass:
       - do: comment
         payload:
