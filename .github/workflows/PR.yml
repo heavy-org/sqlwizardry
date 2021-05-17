@@ -1,9 +1,6 @@
 name: Pull Request Validation
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
@@ -13,13 +10,13 @@ env:
   CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
 
 jobs:
-  Initialise:
+  Setup:
     runs-on: self-hosted
     steps:
     - name: Checkout code. 
       run: apt-get install gcov lcov gcovr libboost-dev libgtest-dev libbenchmark-dev cmake clang-tidy clang-format doxygen ninja-build python3 python3-venv python3-pip libgmock-dev
   Checkout:
-    needs: Initialise
+    needs: Setup
     runs-on: self-hosted
     steps:
     - name: Checkout code. 
