@@ -14,7 +14,7 @@ jobs:
     runs-on: self-hosted
     steps:
     - name: Checkout code. 
-      run: apt-get install gcov lcov gcovr libboost-dev libgtest-dev libbenchmark-dev cmake clang-tidy clang-format doxygen ninja-build python3 python3-venv python3-pip libgmock-dev
+      run: sudo apt-get install gcov lcov gcovr libboost-dev libgtest-dev libbenchmark-dev cmake clang-tidy clang-format doxygen ninja-build python3 python3-venv python3-pip libgmock-dev
   Checkout:
     needs: Setup
     runs-on: self-hosted
