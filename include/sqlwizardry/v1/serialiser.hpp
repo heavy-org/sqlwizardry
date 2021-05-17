@@ -11,12 +11,6 @@
 #include <sqlwizardry/v1/predicate.hpp>
 
 namespace sqlwizardry {
-
-template <typename MODEL, typename DB, typename SELECT, typename WHERE, typename ORDER_BY, typename LIMIT>
-struct query_serialiser {
-    const Query<MODEL, DB, SELECT, WHERE, ORDER_BY, LIMIT>& query;
-    query_serialiser(const Query<MODEL, DB, SELECT, WHERE, ORDER_BY, LIMIT>& q) : query{q} {}
-
     SQLWIZARDRY_DECLARE_BEGIN_ELEMENT_SERIALISER(select_element)
     ss << element.table_name << "." << element.name;
     SQLWIZARDRY_DECLARE_END_ELEMENT_SERIALISER
@@ -148,9 +142,10 @@ struct query_serialiser {
 
 
     SQLWIZARDRY_DECLARE_BEGIN_SERIALISER(where)
-    if constexpr(!is_empty_v<WHERE>) {
+    using where_t = typename type_of_t<where_tag, ELEMENTS...>::value_type;
+    if constexpr(!is_empty_v<where_t>) {
         ss << "WHERE ";
-        where_element<std::decay_t<WHERE>>{query.get_where()}(ss);
+        where_element<std::decay_t<where_t>>{query.get_where()}(ss);
     }
     SQLWIZARDRY_DECLARE_END_SERIALISER
 
@@ -171,7 +166,8 @@ struct query_serialiser {
     SQLWIZARDRY_END_TYPE_SPECIALISATION_ELEMENT_SERIALISER
 
     SQLWIZARDRY_DECLARE_BEGIN_SERIALISER(order)
-    if constexpr(!is_empty_v<WHERE>) {
+    using order_t = type_of_t<order_tag, ELEMENTS...>;
+    if constexpr(!is_empty_v<order_t>) {
         ss << "ORDER BY ";
         std::apply([&ss](const auto& ...order) {
             int column = 0;
@@ -181,6 +177,11 @@ struct query_serialiser {
         },query.get_order());
     }
     SQLWIZARDRY_DECLARE_END_SERIALISER
+
+template <typename MODEL, typename DB, typename ...ELEMENTS>
+struct query_serialiser {
+    const Query<MODEL, DB, ELEMENTS...>& query;
+    query_serialiser(const Query<MODEL, DB, ELEMENTS...>& q) : query{q} {}
 
     auto operator()(std::ostream& ss) {
         select{query}(ss);

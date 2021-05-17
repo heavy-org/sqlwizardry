@@ -12,6 +12,12 @@
 
 namespace sqlwizardry {
 
+template <typename MODEL, typename DATABASE, typename... ELEMENTS>
+struct AllQuery; 
+
+template <typename MODEL, typename DATABASE, typename... ELEMENTS>
+class Query;
+
 namespace detail {
     template <typename COLUMNS>
     constexpr auto get_ordering(COLUMNS column) {
@@ -28,6 +34,11 @@ namespace detail {
         return std::make_tuple(get_ordering(std::move(cols))...);
     }
     
+
+    template <typename MODEL, typename DB, typename... T>
+    constexpr auto make_query(DB& db, T&& ...ELEMENTS) {
+        return Query<MODEL, DB, std::decay_t<T>...>{db, std::forward<T>(ELEMENTS)...};
+    }
 }
 
 template <typename... COLUMNS>
@@ -36,67 +47,70 @@ constexpr auto get_ordering_tuple(COLUMNS... cols) {
 }
 
 
-template <typename MODEL, typename DATABASE, typename SELECT = empty, typename WHERE = empty, typename ORDER_BY = empty, typename LIMIT = empty>
+template <typename MODEL, typename DATABASE, typename... ELEMENTS>
 struct AllQuery; 
 
-template <typename MODEL, typename DATABASE, typename SELECT = empty, typename WHERE = empty, typename ORDER_BY = empty, typename LIMIT = empty>
+template <typename MODEL, typename DATABASE, typename... ELEMENTS>
 class Query {
     protected:
     DATABASE& db;
-    SELECT _select;
-    WHERE _where;
-    ORDER_BY _order_by;
-    LIMIT _limit;
+    type_of_t<select_tag,ELEMENTS...> _select;
+    type_of_t<where_tag,ELEMENTS...> _where;
+    type_of_t<order_tag,ELEMENTS...> _order_by;
+    type_of_t<limit_tag,ELEMENTS...> _limit;
 
     public:
-    constexpr explicit Query(DATABASE& dbIn) : db{dbIn} {}
 
-    constexpr Query(DATABASE& db, SELECT s, WHERE w, ORDER_BY o, LIMIT l) : db{db}, _select{std::move(s)}, _where{std::move(w)}, _order_by{std::move(o)}, _limit{std::move(l)} {
+    constexpr Query(DATABASE& db, ELEMENTS... e) 
+        : db{db}, 
+        _select{std::move(value_of<select_tag>(e...))}, 
+        _where{std::move(value_of<where_tag>(e...))}, 
+        _order_by{std::move(value_of<order_tag>(e...))}, 
+        _limit{std::move(value_of<limit_tag>(e...))} {
 
     }
 
     template <typename ...COLUMNS>
     [[nodiscard]] constexpr auto select(COLUMNS&& ...cols) {
-        static_assert(is_empty_v<SELECT>, "Selection already made in this query,");
+        static_assert(is_empty_v<decltype(_select.value)>, "Selection already made in this query,");
         if constexpr(sizeof...(cols) == 0) {
             auto fields = get_columns<MODEL>();
-            return Query<MODEL, DATABASE, decltype(fields), WHERE,ORDER_BY, LIMIT>{db, std::move(fields), std::move(_where), std::move(_order_by), std::move(_limit)};
+            return detail::make_query<MODEL>(db, kv<select_tag>(std::move(fields)), std::move(_where), std::move(_order_by), std::move(_limit));
         } else {
-            return Query<MODEL, DATABASE, std::tuple<COLUMNS...>, WHERE, ORDER_BY, LIMIT>{db, std::forward_as_tuple(cols...), std::move(_where), std::move(_order_by), std::move(_limit)};
+            return detail::make_query<MODEL>(db, kv<select_tag>(std::make_tuple(cols...)), std::move(_where), std::move(_order_by), std::move(_limit));
         }
     }
 
     template <typename PREDICATE>
     [[nodiscard]] constexpr auto where(PREDICATE&& pred) {
-        if constexpr(is_empty_v<WHERE>) {
-            return Query<MODEL, DATABASE, SELECT,std::decay_t<PREDICATE>, ORDER_BY, LIMIT>{db, std::move(_select), std::forward<PREDICATE>(pred), std::move(_order_by), std::move(_limit)};
+        if constexpr(is_empty_v<decltype(_where.value)>) {
+            return detail::make_query<MODEL>(db, std::move(_select), kv<where_tag>(std::forward<PREDICATE>(pred)), std::move(_order_by), std::move(_limit));
         } else {
-            using PRED_TYPE = decltype(_where && pred);
-            return Query<MODEL, DATABASE, SELECT,PRED_TYPE, ORDER_BY, LIMIT>{db, std::move(_select), _where && std::forward<PREDICATE>(pred), std::move(_order_by), std::move(_limit)};
+            return detail::make_query<MODEL>(db, std::move(_select), kv<where_tag>(_where.value && std::forward<PREDICATE>(pred)), std::move(_order_by), std::move(_limit));
         }
     }
 
     template <typename ...ORDERING>
     [[nodiscard]] constexpr auto order_by(ORDERING&& ...order){
-        static_assert(is_empty_v<ORDER_BY>, "This query already has an ordering specified");
+        static_assert(is_empty_v<decltype(_order_by.value)>, "This query already has an ordering specified");
         auto ordering = get_ordering_tuple(std::forward<ORDERING>(order)...);
-        return Query<MODEL, DATABASE, SELECT, WHERE, std::decay_t<decltype(ordering)>, LIMIT>{db, std::move(_select), std::move(_where), std::move(ordering), std::move(_limit)};
+        return detail::make_query<MODEL>(db, std::move(_select), std::move(_where), kv<order_tag>(std::move(ordering)), std::move(_limit));
     }
 
     [[nodiscard]] constexpr const auto& get_select() const {
-        return _select;
+        return _select.value;
     }
 
     [[nodiscard]] constexpr const auto& get_where() const {
-        return _where;
+        return _where.value;
     }
 
     [[nodiscard]] constexpr const auto& get_order() const {
-        return _order_by;
+        return _order_by.value;
     }
 
     [[nodiscard]] constexpr const auto& get_limit() const {
-        return _limit;
+        return _limit.value;
     }
 
     [[nodiscard]] constexpr auto& get_db() {
@@ -104,8 +118,8 @@ class Query {
     }
 
     [[nodiscard]] constexpr auto all() {
-        static_assert(!is_empty_v<SELECT>, "This query needs at leas one selection. Did you forget to call .select()?");
-        return AllQuery<MODEL, DATABASE, SELECT, WHERE, ORDER_BY, LIMIT>{*this};
+        static_assert(!is_empty_v<decltype(_select.value)>, "This query needs at leas one selection. Did you forget to call .select()?");
+        return AllQuery<MODEL, DATABASE, ELEMENTS...>{*this};
     }
 };
 
@@ -120,16 +134,16 @@ struct model {
     }    
 };
 
-template <typename MODEL, typename DB, typename SELECT, typename WHERE, typename ORDER_BY, typename LIMIT>
+template <typename MODEL, typename DB, typename... ELEMENTS>
 struct query_serialiser;
 
-template <typename MODEL, typename DATABASE, typename SELECT, typename WHERE, typename ORDER_BY, typename LIMIT>
-class AllQuery : private Query<MODEL, DATABASE, SELECT, WHERE, ORDER_BY, LIMIT>
+template <typename MODEL, typename DATABASE, typename... ELEMENTS>
+class AllQuery : private Query<MODEL, DATABASE, ELEMENTS...>
 {
-    using QUERY_T = Query<MODEL, DATABASE, SELECT, WHERE, ORDER_BY, LIMIT>;
+    using QUERY_T = Query<MODEL, DATABASE, ELEMENTS...>;
     public:
 
-    constexpr AllQuery(QUERY_T q) : QUERY_T{std::move(q)} {}
+    constexpr AllQuery(Query<MODEL, DATABASE, ELEMENTS...> q) : QUERY_T{std::move(q)} {}
 
     auto begin() {
         std::stringstream ss;
