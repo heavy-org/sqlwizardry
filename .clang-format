@@ -5,7 +5,6 @@ BreakBeforeBraces: Allman
 BreakStringLiterals: 'true'
 Cpp11BracedListStyle: 'true'
 SpaceAfterTemplateKeyword: 'true'
-Standard: Cpp11
+Standard: Cpp17
 UseTab: Never
 ColumnLimit: 140
-...
