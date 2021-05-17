@@ -13,7 +13,13 @@ env:
   CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
 
 jobs:
+  Initialise:
+    runs-on: self-hosted
+    steps:
+    - name: Checkout code. 
+      run: apt-get install gcov lcov gcovr libboost-dev libgtest-dev libbenchmark-dev cmake clang-tidy clang-format doxygen ninja-build python3 python3-venv python3-pip libgmock-dev
   Checkout:
+    needs: Initialise
     runs-on: self-hosted
     steps:
     - name: Checkout code. 
@@ -47,7 +53,11 @@ jobs:
     - name: Generate Coverage
       run: |
         . venv/bin/activate
-        gcovr --xml coverage.xml
+        lcov --directory . --capture --output-file coverage.info
+        lcov --remove coverage.info '/usr/*' --output-file coverage.info
+        lcov --list coverage.info
+    - name: Upload Coverage Reports
+      run: bash <(curl -s https://codecov.io/bash) -v coverage.xml || echo "Codecov did not collect coverage reports"
   Archive-Artifacts:
     needs: Coverage
     runs-on: self-hosted
@@ -59,10 +69,3 @@ jobs:
         path: |
           **/*.xunit.xml
           coverage.xml
-  Upload-Codecov:
-    needs: Archive-Artifacts
-    runs-on: self-hosted
-    steps:
-    - name: Upload Coverage Reports
-      run: bash <(curl -s https://codecov.io/bash) -v || echo "Codecov did not collect coverage reports"
-  
