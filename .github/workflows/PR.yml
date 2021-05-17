@@ -1,0 +1,68 @@
+name: Pull Request Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: 1
+  CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
+
+jobs:
+  Setup:
+    runs-on: self-hosted
+    steps:
+    - name: Checkout code. 
+      run: sudo apt-get update && sudo apt-get install -y lcov gcovr libboost-dev libgtest-dev libbenchmark-dev cmake clang-tidy clang-format doxygen ninja-build python3 python3-venv python3-pip libgmock-dev
+  Checkout:
+    needs: Setup
+    runs-on: self-hosted
+    steps:
+    - name: Checkout code. 
+      uses: actions/checkout@v1
+  Initialise:
+    needs: Checkout
+    runs-on: self-hosted
+    steps:
+    - name: Initialise and build the project.
+      run: |
+        make docs-init
+        . venv/bin/activate
+        make init
+  Build:
+    needs: Initialise
+    runs-on: self-hosted
+    steps:
+    - name: Build sqlwizardry
+      run: make build
+  Execute-Tests:
+    needs: Build
+    runs-on: self-hosted
+    steps:
+    - name: Build tests
+      run: |
+        make test 
+  Coverage:
+    needs: Execute-Tests
+    runs-on: self-hosted
+    steps:
+    - name: Generate Coverage
+      run: |
+        . venv/bin/activate
+        lcov --directory . --capture --output-file coverage.info
+        lcov --remove coverage.info '/usr/*' --output-file coverage.info
+        lcov --list coverage.info
+    - name: Upload Coverage Reports
+      run: bash <(curl -s https://codecov.io/bash) -v coverage.xml || echo "Codecov did not collect coverage reports"
+  Archive-Artifacts:
+    needs: Coverage
+    runs-on: self-hosted
+    steps:
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: XUnit
+        path: |
+          **/*.xunit.xml
+          coverage.xml

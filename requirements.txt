@@ -1,8 +1,6 @@
-sphinx
-sphinx-material
-sphinx-theme-material
-breathe
-exhale
+mkdocs-material
+pymdown-extensions
+markdown
 wheel
 conan
 gcovr

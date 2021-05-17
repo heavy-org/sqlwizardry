@@ -43,4 +43,4 @@ CMAKE_DEPENDENT_OPTION(SQLWIZARDRY_DOCS
   "Build the SqlWizardry-v1 documentation"
   ON "${is_standalone}" OFF)
 
-mark_as_advanced(SQLWIZARDRY_V1_PERF)
+mark_as_advanced(SQLWIZARDRY_PERF)

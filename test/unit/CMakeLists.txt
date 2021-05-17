@@ -8,8 +8,7 @@ target_link_libraries(tests PUBLIC
     sqlwizardry
     gtest
     gtest_main
-    gmock
-    pthread 
+    pthread
 )
 
 set_target_properties(tests PROPERTIES

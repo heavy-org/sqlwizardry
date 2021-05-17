@@ -7,6 +7,8 @@ else()
     set(is_standalone NO)
 endif()
 
+
+
 if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
     message(FATAL_ERROR "In-source builds not allowed. Please make a new
     directory (called a build directory) and run CMake from there.")
@@ -26,14 +28,6 @@ include(ClangTidy)
 
 file( GLOB_RECURSE SRCS *.cpp *.h )
 
-if(SQLWIZARDRY_TESTS)
-    include(CTest)
-    add_subdirectory(test)
-endif()
-
-if(SQLWIZARDRY_V1_DOCS)
-add_subdirectory(docs)
-endif()
 set(Boost_USE_STATIC_LIBS ON) 
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME ON) 
@@ -46,6 +40,30 @@ add_library(sqlwizardry::sqlwizardry ALIAS sqlwizardry)
 target_include_directories(sqlwizardry INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>)
 target_include_directories(sqlwizardry SYSTEM INTERFACE $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/>)
 target_compile_options(sqlwizardry INTERFACE $<$<CXX_COMPILER_ID:MSVC>:/permissive->)
+
+if(SQLWIZARDRY_TESTS)
+    include(CTest)
+    add_subdirectory(test)
+endif()
+
+if(SQLWIZARDRY_DOCS)
+    # setup venv if it doesn't exist
+    IF (NOT EXISTS "${CMAKE_BINARY_DIR}/venv")
+        FIND_PACKAGE(Python3)
+        EXECUTE_PROCESS(COMMAND ${Python3_EXECUTABLE} "-m" "venv" "venv"
+                WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+        UNSET(${Python3_EXECUTABLE})
+    ENDIF ()
+    # activate python venv
+    SET(ENV{VIRTUAL_ENV} "${CMAKE_BINARY_DIR}/venv")
+    set (Python3_FIND_VIRTUALENV FIRST)
+    ## unset Python3_EXECUTABLE because it is also an input variable (see documentation, Artifacts Specification section)
+    unset (Python3_EXECUTABLE)
+    ## Launch a new search
+    find_package (Python3 3.8 COMPONENTS Interpreter Development)
+    execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install -r ${CMAKE_SOURCE_DIR}/requirements.txt)
+    execute_process(COMMAND ${Python3_EXECUTABLE} -m mkdocs build WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+endif()
 
 add_custom_target(tar ALL COMMAND
     ${CMAKE_COMMAND} -E tar "cfvzP" "${PROJECT_NAME}-${PROJECT_VERSION}.tar.gz" "${EXECUTABLE_OUTPUT_PATH}")

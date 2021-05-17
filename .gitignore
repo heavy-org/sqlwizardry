@@ -1,6 +1,8 @@
 # Prerequisites
 *.d
 build/
+venv/
+site/
 
 # Compiled Object files
 *.slo

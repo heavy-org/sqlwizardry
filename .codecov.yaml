@@ -1,5 +1,6 @@
 codecov:
   require_ci_to_pass: yes
+  bot: "codecov-io"
 
 coverage:
   precision: 2
