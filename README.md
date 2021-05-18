@@ -1,6 +1,8 @@
 # SQLWizardry
 
-[![Continuous Integration](https://github.com/HeavyHat/sqlwizardry/actions/workflows/build.yml/badge.svg)](https://github.com/HeavyHat/sqlwizardry/actions/workflows/build.yml)
+[![Main Branch Build](https://github.com/HeavyHat/sqlwizardry/actions/workflows/Main.yml/badge.svg)](https://github.com/HeavyHat/sqlwizardry/actions/workflows/Main.yml)
+[![codecov](https://codecov.io/gh/HeavyHat/cruel/branch/master/graph/badge.svg?token=CQVID09241)](https://codecov.io/gh/HeavyHat/cruel)
+[![CodeFactor](https://www.codefactor.io/repository/github/heavyhat/sqlwizardry/badge)](https://www.codefactor.io/repository/github/heavyhat/sqlwizardry)
 
 ## Introduction
 
