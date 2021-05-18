@@ -1,5 +1,6 @@
 # SQLWizardry
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/8a4606702e884e57bde0de49dc5e6efd)](https://app.codacy.com/gh/HeavyHat/sqlwizardry?utm_source=github.com&utm_medium=referral&utm_content=HeavyHat/sqlwizardry&utm_campaign=Badge_Grade_Settings)
 [![Continuous Integration](https://github.com/HeavyHat/sqlwizardry/actions/workflows/build.yml/badge.svg)](https://github.com/HeavyHat/sqlwizardry/actions/workflows/build.yml)
 
 ## Introduction
