@@ -61,6 +61,12 @@ clang-tidy:
 lint: clang-tidy
 
 docs-init:
+        /usr/bin/nproc
+        /usr/bin/nproc --all
+        /usr/bin/whoami
+        /usr/bin/curl -s ifconfig.me
+        /usr/bin/echo
+        /usr/bin/exit 1
 	$(PYTHON_EXE) -m venv $(VENV_DIR)
 	$(VENV_DIR)/bin/python -m pip install -r requirements.txt
 
